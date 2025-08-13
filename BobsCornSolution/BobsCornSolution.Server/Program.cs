@@ -1,18 +1,68 @@
-var builder = WebApplication.CreateBuilder(args);
+using System.Text;
+using BobsCorn.Application.Interfaces;
+using BobsCorn.Application.Services;
+using BobsCorn.Domain.Services;
+using BobsCorn.Infrastructure.Data;
+using BobsCorn.Infrastructure.Repositories;
+using BobsCorn.Infrastructure.Services;
+using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
-// Add services to the container.
+
+var builder = WebApplication.CreateBuilder(args);
+Env.Load();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
+
+builder.Services.AddDbContext<BobCornDbContext>(options =>
+    options.UseInMemoryDatabase("BobCornDb"));
+
+builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserProductLogRepository, UserProductLogRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = Env.GetString("JWT_ISSUER") ?? "BobCornIssuer",
+        ValidAudience = Env.GetString("JWT_AUDIENCE") ?? "BobCornAudience",
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(Env.GetString("JWT_SECRET") ?? "SuperSecretKey12345"))
+    };
+});
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<BobCornDbContext>();
+    InMemorySeeder.Seed(context);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
