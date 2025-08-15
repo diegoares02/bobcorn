@@ -10,16 +10,20 @@ namespace BobsCorn.Application.Services
         private readonly IUserProductLogRepository _userProductLogRepository;
 
         private readonly IProductRepository _productRepository;
+        private readonly IUserRepository _userRepository;
 
-        public ProductService(IUserProductLogRepository userProductLogRepository, IProductRepository productRepository)
+        public ProductService(IUserProductLogRepository userProductLogRepository, IProductRepository productRepository, IUserRepository userRepository)
         {
             _userProductLogRepository = userProductLogRepository;
             _productRepository = productRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<(HttpStatusCode, string)> BuyCornAsync(ProductBuyDto productBuyDto)
         {
-            var lastPurchase = await _userProductLogRepository.GetLastPurchaseTimeAsync(productBuyDto.UserId);
+            var user = _userRepository.GetUser(productBuyDto.Email);
+
+            var lastPurchase = await _userProductLogRepository.GetLastPurchaseTimeAsync(user.Value);
 
             if (lastPurchase.HasValue && lastPurchase.Value.AddMinutes(1) > DateTime.UtcNow)
             {
@@ -34,7 +38,7 @@ namespace BobsCorn.Application.Services
 
             var newPurchase = new UserProductLog
             {
-                UserId = productBuyDto.UserId,
+                UserId = user.Value,
                 ProductId = productBuyDto.ProductId,
                 PurchaseDate = DateTime.UtcNow
             };
@@ -43,6 +47,11 @@ namespace BobsCorn.Application.Services
             await _productRepository.DecrementProductQuantityAsync(productBuyDto.ProductId);
 
             return (HttpStatusCode.OK, "Success");
+        }
+
+        public int GetAvailableProduct()
+        {
+            return _productRepository.GetAvailableProducts().Value;
         }
 
         public async Task<List<ReportDto>> GetPurchaseReportAsync(int userId)

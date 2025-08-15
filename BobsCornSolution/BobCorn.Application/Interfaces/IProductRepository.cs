@@ -6,5 +6,6 @@ namespace BobsCorn.Application.Interfaces
     {
         Task<Product?> GetProductByIdAsync(int productId);
         Task DecrementProductQuantityAsync(int productId);
+        int? GetAvailableProducts();
     }
 }

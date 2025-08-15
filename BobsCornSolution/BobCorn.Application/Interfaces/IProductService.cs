@@ -8,5 +8,7 @@ namespace BobsCorn.Application.Interfaces
         Task<(HttpStatusCode, string)> BuyCornAsync(ProductBuyDto productBuyDto);
 
         Task<List<ReportDto>> GetPurchaseReportAsync(int userId);
+
+        int GetAvailableProduct();
     }
 }

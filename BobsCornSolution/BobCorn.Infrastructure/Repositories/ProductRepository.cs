@@ -23,6 +23,11 @@ namespace BobsCorn.Infrastructure.Repositories
             }
         }
 
+        public int? GetAvailableProducts()
+        {
+            return _context.Products.FirstOrDefault(x => x.Name == "Corn")?.Quantity;
+        }
+
         public async Task<Product?> GetProductByIdAsync(int productId)
         {
             return await _context.Products.FirstOrDefaultAsync(p => p.ProductId == productId);

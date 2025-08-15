@@ -6,6 +6,7 @@ namespace BobsCorn.Application.Interfaces
     public interface IUserRepository
     {
         Task<(HttpStatusCode, string)> LoginAsync(UserLoginDto user);
-        Task<(HttpStatusCode,string)> AddUserAsync(UserRegisterDto user);
+        Task<(HttpStatusCode, string)> AddUserAsync(UserRegisterDto user);
+        int? GetUser(string email);
     }
 }

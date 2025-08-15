@@ -9,6 +9,8 @@ namespace BobsCorn.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly string _secretKey = Environment.GetEnvironmentVariable("ENCRYPTION_KEY") ?? "Secret key is missing";
+        private readonly string _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "Issuer";
+        private readonly string _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "Audience";
 
         public string GenerateToken(string userId)
         {
@@ -21,6 +23,8 @@ namespace BobsCorn.Infrastructure.Services
                 {
                     new Claim(ClaimTypes.NameIdentifier, userId)
                 }),
+                Issuer = _issuer,
+                Audience = _audience,
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),

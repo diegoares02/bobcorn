@@ -5,6 +5,8 @@ using BobsCorn.Infrastructure.Utilities;
 using BobsCorn.Application.DTOs;
 using BobsCorn.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using BobsCorn.Domain.Entities;
 
 namespace BobsCorn.Infrastructure.Repositories
 {
@@ -33,7 +35,7 @@ namespace BobsCorn.Infrastructure.Repositories
                 return (HttpStatusCode.BadRequest, string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage)));
             }
 
-            var newUser = new BobsCorn.Domain.Entities.User
+            var newUser = new Domain.Entities.User
             {
                 Email = user.Email,
                 Password = EncryptionUtils.Encrypt(user.Password),
@@ -45,6 +47,11 @@ namespace BobsCorn.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return (HttpStatusCode.OK, "User registered successfully.");
+        }
+
+        public int? GetUser(string email)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email)?.UserId;
         }
 
         public async Task<(HttpStatusCode, string)> LoginAsync(UserLoginDto user)
@@ -64,7 +71,7 @@ namespace BobsCorn.Infrastructure.Repositories
                 return (HttpStatusCode.NotFound, "User not found");
             }
 
-            return (HttpStatusCode.OK, "User found");
+            return (HttpStatusCode.OK, JsonSerializer.Serialize(userFound));
         }
     }
 }

@@ -43,7 +43,7 @@ namespace BobCornSolution.Server.Controllers
                     return NotFound(new ApiResponse<string>((int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), result.Item2));
                 }
 
-                var response = new ApiResponse<string>(200, "Logged successfully.", _tokenService.GenerateToken(userLoginDto.Email));
+                var response = new ApiResponse<object>(200, "Logged successfully.", new { Token = _tokenService.GenerateToken(userLoginDto.Email), User = userLoginDto.Email });
                 return Ok(response);
             }
             catch (Exception ex)
