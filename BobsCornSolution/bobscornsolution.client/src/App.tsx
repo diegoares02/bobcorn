@@ -52,7 +52,7 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (userState && userState.user?.data.data !== null) {
+        if (userState && userState.user?.data?.data !== null) {
             setIsLogged(true);
         }
         else {
@@ -92,7 +92,7 @@ function App() {
             <img src="https://media.istockphoto.com/id/1521680045/vector/simple-corn-clipart-vector-illustration-isolated-on-white-background-cute-corn-or-corncob.jpg?s=612x612&w=0&k=20&c=b2A2gpqDfcyYfREw4sDbbLjPrgyKzpNwAFXNLAawVBM=" width={120} height={120} />
             <br />
             <h2>Available</h2>
-            <h3>{data.data.quantity}</h3>
+            <h3>{(data && data?.data && data.data?.quantity)??0}</h3>
             <br />
             <BuyButton onReloadAvailability={handleReloadAvailability}/>
         </>;
