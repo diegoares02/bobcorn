@@ -101,7 +101,7 @@ const userSlice = createSlice({
         state.status = 'succeeded';
       })
       .addCase(buy.fulfilled, (state, action) => {
-        // handle buy response if needed
+        state.data = action.payload;
         state.status = 'succeeded';
       })
       .addCase(logout.fulfilled, (state, action) => {
